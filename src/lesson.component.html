@@ -1,0 +1,198 @@
+<article class="lesson-page">
+  <div class="breadcrumbs">SYNTRIX EDU <span>/</span> MODULE {{ lesson.number }} <span>/</span> {{ lesson.title | uppercase }}</div>
+  <div class="lesson-hero">
+    <div><div class="section-kicker"><span>{{ lesson.number }}</span> LANGUAGE PROCESSING</div><h1>{{ lesson.title }}<span class="accent">.</span></h1><p>{{ lesson.subtitle }}</p></div>
+    <div class="hero-stamp"><span>LEARN BY DOING</span><strong>{{ lesson.number }}<small> / 08</small></strong><span>THEORY → PRACTICE</span></div>
+  </div>
+  @if (lesson.id === 'foundations') {
+    <div class="pipeline" role="img" aria-label="Language processing pipeline: source text to lexer, tokens, parser, syntax tree and meaning">
+      <div><small>01</small> SOURCE</div><span>→</span><div><small>02</small> LEXER</div><span>→</span><div><small>03</small> TOKENS</div><span>→</span><div><small>04</small> PARSER</div><span>→</span><div><small>05</small> AST</div><span>→</span><div><small>06</small> MEANING</div>
+    </div>
+  }
+  <section class="learning-box" aria-labelledby="outcomes-title">
+    <div><div class="section-kicker">STUDY GUIDE</div><h2 id="outcomes-title">What you will learn</h2>
+      @if (previous; as prerequisite) {<p>Recommended preparation: <a [routerLink]="['/course', prerequisite.id]">{{ prerequisite.title }}</a>.</p>}
+      @else {<p>Start here; no prior knowledge of automata or parsing is assumed.</p>}
+    </div>
+    <ul>@for (outcome of lesson.outcomes; track $index) {<li>{{ outcome }}</li>}</ul>
+  </section>
+  <div class="reading-heading"><span>THE CONCEPTS</span><span>READ · EXPLORE · APPLY</span></div>
+  <div class="reading-grid">
+    @for (section of lesson.sections; track section.title; let i = $index) {
+      <section class="reading-card"><div class="reading-number">0{{ i + 1 }} / THEORY</div><h2>{{ section.title }}</h2>@for (paragraph of section.paragraphs; track $index) {<p>{{ paragraph }}</p>}</section>
+    }
+  </div>
+  <section class="worked-example" aria-labelledby="worked-title">
+    <div class="reading-number">WORKED EXAMPLE</div>
+    <h2 id="worked-title">{{ lesson.example.title }}</h2>
+    <p>{{ lesson.example.introduction }}</p>
+    <ol>@for (step of lesson.example.steps; track $index) {<li>{{ step }}</li>}</ol>
+    <p><strong>{{ lesson.example.conclusion }}</strong></p>
+    <button class="button secondary" type="button" (click)="applyExample(lesson.example.preset); lab.scrollIntoView({ behavior: 'smooth' })">Load example in lab <span>→</span></button>
+    <p class="example-note">Loading replaces the current lab inputs. Edit the example and run it again to explore.</p>
+  </section>
+  <section class="syntrix-connection" aria-labelledby="syntrix-title">
+    <div class="reading-number">FROM THEORY TO LIBRARY</div>
+    <h2 id="syntrix-title">How this uses Syntrix</h2>
+    <p>{{ lesson.syntrix.description }}</p>
+    <p>Relevant public API: @for (name of lesson.syntrix.api; track name; let last = $last) {<code>{{ name }}</code>{{ last ? '' : ', ' }}}.</p>
+    <p>Explore the <a href="https://github.com/primo-malvado/syntrix#readme" target="_blank" rel="noopener noreferrer">Syntrix documentation and installation guide</a> or visit the <a href="https://primo-malvado.github.io/syntrix/" target="_blank" rel="noopener noreferrer">Syntrix website</a>.</p>
+  </section>
+  <section #lab class="course-lab" id="lab">
+    <div class="lab-heading"><div><div class="section-kicker"><span>✳</span> INTERACTIVE LAB</div><h2>Make it yours<span class="accent">.</span></h2><p>Every input below is editable. Change an example, run it, and inspect the result.</p></div><div class="lab-powered"><span class="live-dot"></span> POWERED BY SYNTRIX</div></div>
+    <div class="editor-panel">
+      <div class="editor-header"><span>EDITOR <small> / {{ job.kind | uppercase }}</small></span><span>EDIT → RUN → EXPLORE</span></div>
+      <div class="editor-body">
+        @if (job.kind === 'automata') {
+          <div class="input-grid">
+            <label>REGULAR EXPRESSION<input [(ngModel)]="job.regex" (ngModelChange)="markDirty()" spellcheck="false" aria-label="Regular expression"></label>
+            <label>INPUT STRING <small>(empty is allowed)</small><input [(ngModel)]="job.input" (ngModelChange)="markDirty()" spellcheck="false" aria-label="Input string"></label>
+          </div>
+          <p class="editor-hint">Syntrix regex syntax: concatenation, |, *, +, ?, groups and character ranges. Up to 64 distinct alphabet symbols are shown.</p>
+        }
+        @if (job.kind === 'lexer') {
+          <label>LEXICAL GRAMMAR<textarea [(ngModel)]="job.lexer" (ngModelChange)="markDirty()" rows="9" spellcheck="false" aria-label="Lexical grammar"></textarea></label>
+          <div class="input-grid">
+            <label>TOKEN RULES <small>(priority order)</small><input [(ngModel)]="job.tokens" (ngModelChange)="markDirty()" spellcheck="false" aria-label="Lexer token rules"></label>
+            <label>INPUT TEXT<input [(ngModel)]="job.input" (ngModelChange)="markDirty()" spellcheck="false" aria-label="Input text"></label>
+          </div>
+        }
+        @if (job.kind === 'grammar') {
+          <label>GRAMMAR <small>(Syntrix EBNF)</small><textarea [(ngModel)]="job.grammar" (ngModelChange)="markDirty()" rows="7" spellcheck="false" aria-label="Grammar"></textarea></label>
+          <div class="input-grid" [class.three]="lesson.id === 'predictive'">
+            <label>START SYMBOL<input [(ngModel)]="job.start" (ngModelChange)="markDirty()" spellcheck="false" aria-label="Start symbol"></label>
+            <label>TERMINALS<input [(ngModel)]="job.tokens" (ngModelChange)="markDirty()" spellcheck="false" aria-label="Terminals"></label>
+            @if (lesson.id === 'predictive') {<label>INPUT TOKEN TYPES<input [(ngModel)]="job.input" (ngModelChange)="markDirty()" spellcheck="false" aria-label="Input token types"></label>}
+          </div>
+          <p class="editor-hint">Separate names with spaces or commas. @if (lesson.id === 'predictive') {Input is a sequence of token types, not raw text.} Use an empty literal (<code>""</code>) for ε.</p>
+        }
+        @if (job.kind === 'parser') {
+          <div class="input-grid">
+            <label>LEXICAL GRAMMAR<textarea [(ngModel)]="job.lexer" (ngModelChange)="markDirty()" rows="10" spellcheck="false" aria-label="Lexical grammar"></textarea></label>
+            <label>PARSER GRAMMAR <small>(with editable JavaScript actions)</small><textarea [(ngModel)]="job.grammar" (ngModelChange)="markDirty()" rows="10" spellcheck="false" aria-label="Parser grammar"></textarea></label>
+          </div>
+          <div class="input-grid three">
+            <label>LEXER TOKENS<input [(ngModel)]="job.lexerTokens" (ngModelChange)="markDirty()" spellcheck="false" aria-label="Lexer tokens"></label>
+            <label>PARSER TOKENS<input [(ngModel)]="job.tokens" (ngModelChange)="markDirty()" spellcheck="false" aria-label="Parser tokens"></label>
+            <label>IGNORED TOKENS<input [(ngModel)]="job.ignore" (ngModelChange)="markDirty()" spellcheck="false" aria-label="Ignored tokens"></label>
+          </div>
+          <div class="input-grid three">
+            <label>START SYMBOL<input [(ngModel)]="job.start" (ngModelChange)="markDirty()" spellcheck="false" aria-label="Start symbol"></label>
+            <label>ALGORITHM<select [(ngModel)]="job.algorithm" (ngModelChange)="markDirty()" aria-label="Parser algorithm"><option value="slr1">SLR(1)</option><option value="lalr1">LALR(1)</option><option value="lr1">LR(1)</option><option value="glr">GLR</option></select></label>
+            <label>INPUT TEXT<input [(ngModel)]="job.input" (ngModelChange)="markDirty()" spellcheck="false" aria-label="Input text"></label>
+          </div>
+          <p class="editor-hint">Embedded actions execute JavaScript. Only run grammars you trust; a time-limited worker is not a security sandbox.</p>
+        }
+        @if (job.kind === 'testing') {
+          <div class="input-grid">
+            <label>LEXICAL GRAMMAR<textarea [(ngModel)]="job.lexer" (ngModelChange)="markDirty()" rows="9" spellcheck="false" aria-label="Lexical grammar"></textarea></label>
+            <label>PARSER GRAMMAR<textarea [(ngModel)]="job.grammar" (ngModelChange)="markDirty()" rows="9" spellcheck="false" aria-label="Parser grammar"></textarea></label>
+          </div>
+          <div class="input-grid three">
+            <label>LEXER TOKENS<input [(ngModel)]="job.lexerTokens" (ngModelChange)="markDirty()" spellcheck="false" aria-label="Lexer tokens"></label>
+            <label>PARSER TOKENS<input [(ngModel)]="job.tokens" (ngModelChange)="markDirty()" spellcheck="false" aria-label="Parser tokens"></label>
+            <label>IGNORED TOKENS<input [(ngModel)]="job.ignore" (ngModelChange)="markDirty()" spellcheck="false" aria-label="Ignored tokens"></label>
+          </div>
+          <label>START SYMBOL<input [(ngModel)]="job.start" (ngModelChange)="markDirty()" spellcheck="false" aria-label="Start symbol"></label>
+          <label>TEST CASES<textarea [(ngModel)]="job.cases" (ngModelChange)="markDirty()" rows="6" spellcheck="false" aria-label="Test cases"></textarea></label>
+          <p class="editor-hint">Up to 100 cases, one per line: <code>accept:</code> or <code>reject:</code> followed by the exact input. Leave the input empty to test ε. Embedded actions execute JavaScript; only run trusted grammars, since a worker is not a security sandbox.</p>
+        }
+        <div class="editor-actions"><button class="button primary" type="button" (click)="run()" [disabled]="running">{{ running ? 'Running…' : 'Run example' }} <span>→</span></button><button class="button secondary" type="button" (click)="reset()">Reset example</button>@if (dirty) {<span class="stale">Inputs changed. Run again to update the result.</span>}</div>
+        @if (error) {<div class="error" role="alert">{{ error }}</div>}
+      </div>
+    </div>
+    @if (result; as current) {
+      <div class="results-heading"><span>RESULTS</span><span>GENERATED FROM YOUR INPUT</span></div>
+      @if (current.kind === 'automata') {
+        @if (lesson.id === 'foundations') {
+          <div class="result-summary"><div><small>DERIVED ALPHABET Σ</small><strong>{{ format(current.alphabet) }}</strong></div><div><small>INPUT LENGTH</small><strong>{{ current.inputLength }}</strong></div><div><small>INPUT IN Σ*</small><strong>{{ current.withinAlphabet ? 'Yes' : 'No' }}</strong></div></div>
+          <div class="result-section"><div class="result-title"><span>RECOGNITION</span><div><h3>Is the input in the language?</h3><p>Input: <code>{{ current.input ? lexeme(current.input) : 'ε (empty string)' }}</code>. NFA: {{ current.nfaAccepts ? 'accepted' : 'rejected' }} · DFA: {{ current.dfaAccepts ? 'accepted' : 'rejected' }}.</p><p>Being in Σ* only means that every input symbol belongs to the derived alphabet. The expression can still reject the string.</p><p>See <a routerLink="/course/automata">Regular expressions &amp; automata</a> for the machines, diagrams and subset construction.</p></div></div></div>
+        } @else {
+        <div class="result-summary"><div><small>ALPHABET</small><strong>{{ format(current.alphabet) }}</strong></div><div><small>NFA</small><strong>{{ current.nfaAccepts ? 'Accepted ✓' : 'Rejected ×' }}</strong></div><div><small>DFA</small><strong>{{ current.dfaAccepts ? 'Accepted ✓' : 'Rejected ×' }}</strong></div></div>
+        <div class="result-section"><div class="result-title"><span>STEP 01</span><div><h3>Regex → ε-NFA</h3><p>Start: {{ format(current.nfa.start) }} · accepting: {{ format(current.nfa.end) }}. Double circles are accepting; arrows mark start states. ε consumes no input.</p></div></div>
+          @if (current.nfa.table.length <= 60) {<machine-diagram [machine]="current.nfa" title="NFA transition diagram" markerId="nfa-arrow" />} @else {<p class="editor-hint">Diagram omitted for a machine with more than 60 transitions; use the complete table below.</p>}
+          <div class="table-wrap compact"><table><thead><tr><th>FROM</th><th>SYMBOL</th><th>TO</th></tr></thead><tbody>@for (edge of current.nfa.table; track $index) {<tr><td>{{ edge.from }}</td><td class="table-accent">{{ edgeLabel(edge._ft_, edge._tt_) }}</td><td>{{ edge.to }}</td></tr>}</tbody></table></div>
+        </div>
+        <div class="result-section"><div class="result-title"><span>STEP 02</span><div><h3>Subset construction</h3><p>Start with the ε-closure of the initial NFA states. Each cell shows direct destinations → their ε-closure → the corresponding DFA state. ∅ means no transition; the sink is omitted.</p></div></div>
+          <div class="table-wrap"><table><thead><tr><th>DFA STATE</th><th>NFA SET</th>@for (symbol of current.alphabet; track symbol) {<th>ON {{ symbol }}</th>}<th>ACCEPTING?</th></tr></thead><tbody>@for (row of current.rows; track row.name) {<tr><td class="table-accent">{{ row.name }}{{ row.name === 'D0' ? ' →' : '' }}</td><td>{{ format(row.states) }}</td>@for (move of row.moves; track move.symbol) {<td><span class="move">{{ format(move.direct) }} → {{ format(move.closure) }}</span><strong>{{ move.target }}</strong></td>}<td>{{ row.accepting ? 'Yes ★' : 'No' }}</td></tr>}</tbody></table></div>
+        </div>
+        <div class="result-section"><div class="result-title"><span>STEP 03</span><div><h3>The Syntrix DFA</h3><p>Its internal state numbers differ from the D0, D1… labels above. Start: {{ format(current.dfa.start) }} · accepting: {{ format(current.dfa.end) }}.</p></div></div>
+          @if (current.dfa.table.length <= 60) {<machine-diagram [machine]="current.dfa" title="DFA transition diagram" markerId="dfa-arrow" />} @else {<p class="editor-hint">Diagram omitted for a machine with more than 60 transitions; use the complete table below.</p>}
+          <div class="table-wrap compact"><table><thead><tr><th>FROM</th><th>SYMBOL</th><th>TO</th></tr></thead><tbody>@for (edge of current.dfa.table; track $index) {<tr><td>{{ edge.from }}</td><td class="table-accent">{{ edgeLabel(edge._ft_, edge._tt_) }}</td><td>{{ edge.to }}</td></tr>}</tbody></table></div>
+        </div>
+        }
+      }
+      @if (current.kind === 'lexer') {
+        <div class="result-section"><div class="result-title"><span>01</span><div><h3>Token stream</h3><p>Whitespace is shown here as a token when included in the token list.</p></div></div>
+          <div class="output-tokens">@for (token of current.tokens; track $index) {<span><b>{{ token.type }}</b><small>{{ lexeme(token.value) }}</small></span>} @empty {<span>No tokens.</span>}</div>
+        </div>
+        <div class="result-section"><div class="result-title"><span>02</span><div><h3>Generated lexer transitions</h3><p>Syntrix combines token machines into a DFA. Character ranges are shown as intervals.</p></div></div>
+          <div class="table-wrap compact"><table><thead><tr><th>FROM</th><th>SYMBOL</th><th>TO</th></tr></thead><tbody>@for (edge of current.transitions; track $index) {<tr><td>{{ edge.from }}</td><td class="table-accent">{{ edgeLabel(edge._ft_, edge._tt_) }}</td><td>{{ edge.to }}</td></tr>}</tbody></table></div>
+        </div>
+      }
+      @if (current.kind === 'grammar') {
+        <div class="result-section"><details [open]="lesson.id === 'grammars'"><summary>Productions after EBNF lowering</summary><p class="editor-hint">Generated __ebnf_ rules include the synthetic start rule and helpers for groups, options and repetitions. ε denotes an empty production.</p>
+          <div class="table-wrap compact"><table><thead><tr><th>ID</th><th>PRODUCTION</th></tr></thead><tbody>@for (production of current.analysis.productions; track production.id) {<tr><td>p{{ production.id }}</td><td>{{ production.lhs }} → {{ production.rhs.join(' ') || 'ε' }}</td></tr>}</tbody></table></div>
+          </details>
+          @if (lesson.id === 'grammars') {<p class="editor-hint">Continue with <a routerLink="/course/predictive">FIRST, FOLLOW &amp; LL(1)</a> for a separate example of predictive tables and traces.</p>}
+        </div>
+        @if (lesson.id === 'predictive') {
+        <div class="result-section"><div class="result-title"><span>STEP 01</span><div><h3>FIRST and FOLLOW</h3><p>Sets are computed until a fixed point. The table uses $ for the end-of-input marker, shown as eof in sets and traces.</p></div></div>
+          <div class="table-wrap"><table><thead><tr><th>NONTERMINAL</th><th>FIRST</th><th>FOLLOW</th></tr></thead><tbody>@for (entry of current.analysis.first; track entry.symbol; let i = $index) {<tr><td class="table-accent">{{ entry.symbol }}</td><td>{{ format(entry.values) }}</td><td>{{ format(current.analysis.follow[i].values) }}</td></tr>}</tbody></table></div>
+          <details class="production-list"><summary>Show fixed-point rounds</summary>@for (round of current.analysis.rounds; track $index) {<div>{{ round }}</div>}</details>
+        </div>
+        <div class="result-section"><div class="result-title"><span>STEP 02</span><div><h3>LL(1) predictive table</h3><p>Cells show production IDs. Multiple IDs in one cell indicate a conflict, not a choice made by the tool.</p></div></div>
+          <div class="table-wrap"><table><thead><tr><th>NONTERMINAL</th>@for (terminal of current.analysis.terminals; track terminal) {<th>{{ showSymbol(terminal) }}</th>}</tr></thead><tbody>@for (row of current.analysis.table; track row.nonterminal) {<tr><td class="table-accent">{{ row.nonterminal }}</td>@for (cell of row.cells; track cell.terminal) {<td [class.conflict]="cell.productions.length > 1">@for (id of cell.productions; track id; let last = $last) {p{{ id }}{{ last ? '' : ', ' }}} @empty {—}</td>}</tr>}</tbody></table></div>
+        </div>
+        <div class="result-section"><div class="result-title"><span>STEP 03</span><div><h3>Predictive parsing trace</h3><p>The rightmost stack symbol is on top. The trace stops at a missing entry or conflict.</p></div></div>
+          <div class="table-wrap compact"><table><thead><tr><th>STACK</th><th>INPUT</th><th>ACTION</th></tr></thead><tbody>@for (step of current.analysis.trace; track $index) {<tr><td>{{ step.stack }}</td><td>{{ step.input }}</td><td>{{ step.action }}</td></tr>}</tbody></table></div>
+          @if (current.analysis.traceError) {<p class="trace-error">{{ current.analysis.traceError }}</p>}
+        </div>
+        }
+      }
+      @if (current.kind === 'parser') {
+        <div class="result-section"><div class="result-title"><span>01</span><div><h3>{{ lesson.id === 'lr-parsing' ? 'Tokens and parse status' : 'AST and semantic value' }}</h3><p>{{ lesson.id === 'lr-parsing' ? 'The tokens include ignored tokens; the parser filters them before parsing.' : 'The parser returns the value produced by your semantic actions.' }}</p></div></div>
+          @if (lesson.id === 'lr-parsing') {
+          <div class="output-tokens">@for (token of current.tokens; track $index) {<span><b>{{ token.type }}</b><small>{{ lexeme(token.value) }}</small></span>} @empty {<span>No tokens.</span>}</div>
+          }
+          @if (current.parseError) {<div class="error" role="alert">{{ current.parseError }}</div>} @else if (lesson.id === 'lr-parsing') {<p class="editor-hint">Input accepted.</p>} @else {<pre class="result-code">{{ current.output }}</pre>}
+          @for (diagnostic of current.diagnostics; track $index) {<p class="trace-error">{{ diagnostic }}</p>}
+          @if (lesson.id === 'semantics') {<p class="editor-hint">For a separate parsing-table and state-diagram example, see <a routerLink="/course/lr-parsing">Bottom-up &amp; LR parsing</a>.</p>}
+        </div>
+        @if (lesson.id === 'lr-parsing') {
+        <div class="result-section"><div class="result-title"><span>02</span><div><h3>Productions and ACTION / GOTO</h3><p>sN = shift, rN = reduce by production N, acc = accept; numeric nonterminal entries are GOTO states. GLR cells may contain multiple actions.</p></div></div>
+          <p class="editor-hint">The diagram shows shift and GOTO transitions between generated parser states. Reductions are decisions in the table, not graph edges; double circles mark accepting states.</p>
+          @if (current.graph.table.length <= 60) {<machine-diagram [machine]="current.graph" title="LR parser state transition diagram" markerId="lr-arrow" />} @else {<p class="editor-hint">Diagram omitted for a machine with more than 60 transitions; use the complete table below.</p>}
+          <details class="production-list"><summary>Show numbered productions</summary>@for (production of current.productions; track production.id) {<div><code>r{{ production.id }}: {{ production.lhs }} → {{ production.rhs.join(' ') || 'ε' }}</code></div>}</details>
+          <div class="table-wrap compact"><table><thead><tr><th>STATE</th>@for (column of current.columns; track column) {<th>{{ column }}</th>}</tr></thead><tbody>@for (row of current.rows; track row.state) {<tr><td class="table-accent">{{ row.state }}</td>@for (cell of row.cells; track $index) {<td>{{ cell }}</td>}</tr>}</tbody></table></div>
+        </div>
+        @if (current.trace.length) {
+          <div class="result-section"><div class="result-title"><span>03</span><div><h3>Shift / reduce trace</h3><p>The rightmost state is on top. GLR may have multiple stacks, so this single-stack trace is only shown for deterministic algorithms.</p></div></div>
+            <div class="table-wrap compact"><table><thead><tr><th>STACK</th><th>INPUT</th><th>ACTION</th></tr></thead><tbody>@for (step of current.trace; track $index) {<tr><td>{{ step.stack }}</td><td>{{ step.input }}</td><td>{{ step.action }}</td></tr>}</tbody></table></div>
+          </div>
+        }
+        }
+      }
+      @if (current.kind === 'testing') {
+        <div class="result-section"><div class="result-title"><span>TEST SUITE</span><div><h3>Acceptance and diagnostics</h3><p>Each case is tokenized completely before parsing, so lexical errors are reported first. Execution errors fail the test even when rejection was expected.</p></div></div>
+          @for (diagnostic of current.diagnostics; track $index) {<p class="trace-error">{{ diagnostic }}</p>}
+          <div class="table-wrap"><table><thead><tr><th>INPUT</th><th>EXPECTED</th><th>OUTCOME</th><th>RESULT</th><th>DETAIL</th></tr></thead><tbody>
+            @for (item of current.cases; track $index) {<tr><td><code>{{ lexeme(item.input) }}</code></td><td>{{ item.expected }}</td><td>{{ item.outcome }}</td><td [class.conflict]="!item.passed">{{ item.passed ? 'PASS' : 'FAIL' }}</td><td class="test-detail">{{ item.message || '—' }}</td></tr>}
+          </tbody></table></div>
+        </div>
+      }
+    }
+  </section>
+  <section class="challenges"><div><div class="section-kicker"><span>✳</span> CHECK YOUR UNDERSTANDING</div><h2>Try it yourself<span class="accent">.</span></h2><p>Use the editable lab above to investigate these questions.</p></div><ol>@for (challenge of lesson.challenges; track $index) {<li>{{ challenge }}</li>}</ol></section>
+  <section class="references" aria-labelledby="references-title">
+    <div class="reading-number">FURTHER READING</div><h2 id="references-title">References</h2>
+    <p>Consult these sources for additional explanations and formal details.</p>
+    <ol>@for (reference of lesson.references; track reference.url) {
+      <li><span>{{ reference.author }}. </span><a [href]="reference.url">{{ reference.title }}</a><span>. {{ reference.focus }}</span></li>
+    }</ol>
+  </section>
+  <nav class="lesson-pagination" aria-label="Course navigation">
+    @if (previous; as item) {<a [routerLink]="['/course', item.id]"><small>← PREVIOUS</small><strong>{{ item.title }}</strong></a>} @else {<span></span>}
+    @if (next; as item) {<a class="next" [routerLink]="['/course', item.id]"><small>NEXT MODULE →</small><strong>{{ item.title }}</strong></a>} @else {<a class="next" routerLink="/course/foundations"><small>BACK TO</small><strong>Course start →</strong></a>}
+  </nav>
+</article>

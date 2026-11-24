@@ -1,0 +1,21 @@
+<header class="course-topbar">
+  <a class="brand" routerLink="/course/foundations"><span class="brand-icon">S<span>_</span></span><span>syntrix<span class="brand-light">.edu</span></span></a>
+  <div class="topbar-center"><span class="live-dot"></span> AN INTERACTIVE COURSE IN LANGUAGE PROCESSING</div>
+  <a class="top-link" href="https://github.com/primo-malvado/syntrix" target="_blank" rel="noopener noreferrer">Syntrix on GitHub ↗</a>
+</header>
+<div class="course-layout">
+  <aside class="course-sidebar">
+    <div class="sidebar-heading"><span>THE COURSE</span><small>08 MODULES</small></div>
+    <h2>From text<br>to meaning<span class="accent">.</span></h2>
+    <p>A hands-on guide to language processing, using the Syntrix lexer and parser library.</p>
+    <nav aria-label="Course modules">
+      @for (lesson of lessons; track lesson.id) {
+        <a [routerLink]="['/course', lesson.id]" routerLinkActive="active">
+          <span>{{ lesson.number }}</span><strong>{{ lesson.title }}</strong><i>→</i>
+        </a>
+      }
+    </nav>
+    <div class="sidebar-foot"><span>✳</span> THEORY + PRACTICE<br><small>Powered by Syntrix</small></div>
+  </aside>
+  <main class="course-main"><router-outlet /></main>
+</div>

@@ -1,0 +1,56 @@
+name: Publish Syntrix Edu
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out Syntrix Edu
+        uses: actions/checkout@v4
+        with:
+          path: syntrix-edu
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: syntrix-edu/package-lock.json
+      - name: Pin npm version
+        run: npm install --global npm@10.9.9
+      - name: Configure GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v5
+      - name: Install dependencies
+        working-directory: syntrix-edu
+        run: npm ci
+      - name: Test
+        working-directory: syntrix-edu
+        run: npm test
+      - name: Build
+        working-directory: syntrix-edu
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: npm run build -- --base-href "${BASE_PATH}/"
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: syntrix-edu/dist/browser
+      - name: Deploy site
+        id: deployment
+        uses: actions/deploy-pages@v4

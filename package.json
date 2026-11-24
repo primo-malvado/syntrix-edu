@@ -1,0 +1,37 @@
+{
+  "name": "syntrix-edu",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/primo-malvado/syntrix-edu.git"
+  },
+  "homepage": "https://primo-malvado.github.io/syntrix-edu",
+  "engines": {
+    "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
+  },
+  "scripts": {
+    "start": "ng serve",
+    "build": "ng build",
+    "test": "node --experimental-strip-types --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@angular/common": "^22.3.0",
+    "@angular/compiler": "^22.3.0",
+    "@angular/core": "^22.3.0",
+    "@angular/forms": "^22.3.0",
+    "@angular/platform-browser": "^22.3.0",
+    "@angular/router": "^22.3.0",
+    "@dagrejs/dagre": "^1.1.8",
+    "rxjs": "^7.8.2",
+    "syntrix": "^0.0.3",
+    "zone.js": "~0.15.1"
+  },
+  "devDependencies": {
+    "@angular/build": "^22.3.0",
+    "@angular/cli": "^22.3.0",
+    "@angular/compiler-cli": "^22.3.0",
+    "typescript": "~6.0.3"
+  }
+}
